@@ -4,90 +4,113 @@ import Browser
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Http
-import Json.Decode exposing (Decoder, Error(..), decodeString, list, string)
+import Json.Decode as Decode
+    exposing
+        ( Decoder
+        , field
+        , list
+        , map2
+        , string
+        )
+
+
+type alias Post =
+    { message : String
+    , data : String
+    }
 
 
 type alias Model =
-    { nicknames : List String
+    { posts : List Post
     , errorMessage : Maybe String
     }
-
 
 view : Model -> Html Msg
 view model =
     div []
         [ button [ onClick SendHttpRequest ]
             [ text "Get data from server" ]
-        , viewNicknamesOrError model
+        , viewPostsOrError model
         ]
 
-
-viewNicknamesOrError : Model -> Html Msg
-viewNicknamesOrError model =
+viewPostsOrError : Model -> Html Msg
+viewPostsOrError model =
     case model.errorMessage of
         Just message ->
             viewError message
 
         Nothing ->
-            viewNicknames model.nicknames
-
+            viewPosts model.posts
 
 viewError : String -> Html Msg
 viewError errorMessage =
     let
         errorHeading =
-            "Couldn't fetch nicknames at this time."
+            "Couldn't fetch data at this time."
     in
     div []
         [ h3 [] [ text errorHeading ]
         , text ("Error: " ++ errorMessage)
         ]
 
-
-viewNicknames : List String -> Html Msg
-viewNicknames nicknames =
+viewPosts : List Post -> Html Msg
+viewPosts posts =
     div []
-        [ h3 [] [ text "Old School Main Characters" ]
-        , ul [] (List.map viewNickname nicknames)
+        [ h3 [] [ text "Posts" ]
+        , table []
+            ([ viewTableHeader ] ++ List.map viewPost posts)
         ]
 
+viewTableHeader : Html Msg
+viewTableHeader =
+    tr []
+        [ th []
+            [ text "Status Code" ]
+        , th []
+            [ text "Data" ]
+        ]
 
-viewNickname : String -> Html Msg
-viewNickname nickname =
-    li [] [ text nickname ]
+viewPost : Post -> Html Msg
+viewPost post =
+    tr []
+        [ td []
+            [ text post.message ]
+        , td []
+            [ text post.data ]
+        ]
 
 
 type Msg
     = SendHttpRequest
-    | DataReceived (Result Http.Error (List String))
+    | DataReceived (Result Http.Error (List Post))
+
+postDecoder : Decoder Post
+postDecoder =
+    map2 Post
+        (field "message" string)
+        (field "data" string)
 
 
-url : String
-url =
-    "http://localhost:5001/api"
-
-
-getNicknames : Cmd Msg
-getNicknames =
+httpCommand : Cmd Msg
+httpCommand =
     Http.get
-        { url = url
-        , expect = Http.expectJson DataReceived nicknamesDecoder
+        { url = "http://localhost:5001/api"
+        , expect = Http.expectJson DataReceived (list postDecoder)
         }
-
-
-nicknamesDecoder : Decoder (List String)
-nicknamesDecoder =
-    list string
-
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         SendHttpRequest ->
-            ( model, getNicknames )
+            ( model, httpCommand )
 
-        DataReceived (Ok nicknames) ->
-            ( { model | nicknames = nicknames }, Cmd.none )
+        DataReceived (Ok posts) ->
+            ( { model
+                | posts = posts
+                , errorMessage = Nothing
+              }
+            , Cmd.none
+            )
 
         DataReceived (Err httpError) ->
             ( { model
@@ -95,7 +118,6 @@ update msg model =
               }
             , Cmd.none
             )
-
 
 buildErrorMessage : Http.Error -> String
 buildErrorMessage httpError =
@@ -115,15 +137,13 @@ buildErrorMessage httpError =
         Http.BadBody message ->
             message
 
-
 init : () -> ( Model, Cmd Msg )
 init _ =
-    ( { nicknames = []
+    ( { posts = []
       , errorMessage = Nothing
       }
     , Cmd.none
     )
-
 
 main : Program () Model Msg
 main =
