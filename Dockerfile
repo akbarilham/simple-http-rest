@@ -1,4 +1,4 @@
-FROM ubuntu:22.04 as builder
+FROM node:14-alpine as builder
 WORKDIR /apps
 RUN apt install wget
 RUN wget https://github.com/elm/compiler/releases/download/0.19.1/binaries-for-linux.tar.gz && \
