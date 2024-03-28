@@ -1,4 +1,4 @@
-FROM elm:latest
+FROM ranbogmord/elm:latest
 WORKDIR /app
 COPY elm.json ./
 # RUN npm install -g elm@latest-0.19.1 && \
