@@ -94,7 +94,7 @@ postDecoder =
 httpCommand : Cmd Msg
 httpCommand =
     Http.get
-        { url = "http://localhost:5001/api"
+        { url = "http://localhost:5001/api/v2"
         , expect = Http.expectJson DataReceived (list postDecoder)
         }
 
