@@ -1,9 +1,9 @@
-FROM node:alpine
+FROM elm:latest
 WORKDIR /app
-COPY package*.json elm.json ./
-RUN npm install -g elm@latest-0.19.1 && \
-    npm install
+COPY elm.json ./
+# RUN npm install -g elm@latest-0.19.1 && \
+#     npm install
 COPY . .
-RUN elm make src/Main.elm --output=elm.js
-EXPOSE 3000
-CMD ["npm", "start"]
+RUN elm make src/HttpExamples.elm --output=elm.js
+EXPOSE 8000
+CMD ["elm", "reactor"]
