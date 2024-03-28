@@ -1,8 +1,8 @@
 FROM node:14-alpine as builder
 WORKDIR /apps
 #RUN apt install wget
-RUN wget https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz  && \
-    tar -xvzf binary-for-linux-64-bit.gz && \
+RUN wget https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz && \
+    gunzip binary-for-linux-64-bit.gz && \
     mv elm /usr/local/bin && \
     rm binary-for-linux-64-bit.gz
 COPY elm.json ./
