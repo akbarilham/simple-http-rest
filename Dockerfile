@@ -1,10 +1,11 @@
 FROM node:14-alpine as builder
 WORKDIR /apps
 #RUN apt install wget
-RUN wget https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz && \
-    gunzip binary-for-linux-64-bit.gz && \
+RUN curl -L -o elm.gz https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz && \
+    gunzip elm.gz && \
+    chmod +x elm
     mv elm /usr/local/bin && \
-    rm binary-for-linux-64-bit.gz
+    rm elm.gz
 COPY elm.json ./
 COPY . .
 RUN elm make src/HttpExamples.elm --output=elm.js
