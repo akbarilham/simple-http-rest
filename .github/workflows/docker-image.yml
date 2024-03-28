@@ -19,6 +19,11 @@ jobs:
     - name: Build the Docker image
       run: docker build . --file Dockerfile --tag ant-web:$(date +%s)
 
+    - name: Debug secrets
+      run: |
+        echo "DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}"
+        echo "DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}"
+
     - name: Log in to Docker Hub 
       uses: docker/login-action@v2
       with:
