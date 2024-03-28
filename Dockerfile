@@ -1,5 +1,6 @@
 FROM ubuntu:22.04 as builder
 WORKDIR /apps
+RUN apt install wget
 RUN wget https://github.com/elm/compiler/releases/download/0.19.1/binaries-for-linux.tar.gz && \
     tar -xvzf binaries-for-linux.tar.gz && \
     mv elm /usr/local/bin && \
